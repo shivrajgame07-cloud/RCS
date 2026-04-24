@@ -1,0 +1,6 @@
+{
+  "name": "Robotics Control System",
+  "description": "Futuristic Tesla-style robotics dashboard with 3D digital twin, MJPEG stream, and real-time telemetry.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": []
+}

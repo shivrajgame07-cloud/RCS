@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neon-blue: #00f2ff;
+  --color-neon-purple: #a855f7;
+  --color-neon-green: #22c55e;
+  --color-bg-dark: #05070a;
+}
+
+@layer base {
+  body {
+    @apply text-slate-200 antialiased overflow-hidden select-none;
+    background: radial-gradient(circle at 50% 50%, #0d121f 0%, #05070a 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/3 backdrop-blur-xl border border-white/8 rounded-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
+  }
+
+  .neon-glow-blue {
+    @apply shadow-[0_0_10px_rgba(0,242,255,0.3)] border-cyan-400/40;
+  }
+
+  .neon-text-blue {
+    @apply text-[#00f2ff] shadow-[0_0_8px_rgba(0,242,255,0.5)];
+  }
+
+  .scanline {
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 242, 255, 0.05) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+  }
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full;
+  }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(400%); }
+}
+
+.animate-scanline {
+  animation: scanline 8s linear infinite;
+}
+
