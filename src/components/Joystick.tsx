@@ -14,6 +14,8 @@ export default function Joystick() {
     handleMove(e);
   };
 
+  const lastEmitTime = useRef(0);
+
   const handleMove = (e: React.MouseEvent | React.TouchEvent | any) => {
     if (!isDragging.current || !containerRef.current) return;
 
@@ -36,10 +38,14 @@ export default function Joystick() {
 
     setPosition({ x: nx, y: ny });
 
-    // Send command to socket
-    const linear = -ny / MAX_DISTANCE; // Forward is negative Y in screen coords
-    const angular = -nx / MAX_DISTANCE; // Left is negative X
-    socket.emit('move', { linear, angular });
+    // Throttled socket emission (20Hz)
+    const now = Date.now();
+    if (now - lastEmitTime.current > 50) {
+      const linear = -ny / MAX_DISTANCE; 
+      const angular = -nx / MAX_DISTANCE; 
+      socket.emit('move', { linear, angular });
+      lastEmitTime.current = now;
+    }
   };
 
   const handleEnd = () => {

@@ -7,12 +7,15 @@ export interface RobotPose {
 export interface RobotSensors {
   battery: number;
   speed: number;
+  acceleration: number;
   temp: number;
   humidity: number;
   voltage: number;
   signal: number;
   wifiFreq: number;
   distanceToTarget: number;
+  proximity: number;
+  servoAngle: number;
 }
 
 export interface RobotState {

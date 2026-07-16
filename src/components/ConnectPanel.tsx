@@ -11,12 +11,24 @@ export default function ConnectPanel({ onConnected }: { onConnected: () => void 
 
   const handleConnect = () => {
     setIsConnecting(true);
-    // Simulate connection delay
+    const logMessage = `SYSTEM: INITIALIZING LINK TO ${ip}...`;
+    useRobotStore.getState().addLog(logMessage);
+
     setTimeout(() => {
       socket.emit('connect_robot', { ip });
-      setCamUrl(`http://${ip}/stream`);
+
+      let targetCamUrl = ip;
+      // If it doesn't start with http or https, assume it's an IP and wrap it
+      if (!ip.startsWith('http://') && !ip.startsWith('https://')) {
+        // Default to port 443 /stream for ESP32 with HTTPS
+        targetCamUrl = ip.includes(':') ? `https://${ip}` : `https://${ip}:443/stream`;
+      }
+      
+      setCamUrl(targetCamUrl);
+      
+      useRobotStore.getState().addLog(`SYSTEM: LINK ESTABLISHED AT ${ip}`);
       onConnected();
-    }, 2000);
+    }, 1500);
   };
 
   return (
@@ -42,9 +54,12 @@ export default function ConnectPanel({ onConnected }: { onConnected: () => void 
 
         <div className="space-y-6">
           <div className="bg-black/40 rounded-2xl p-6 border border-white/5 space-y-4 shadow-inner">
-            <div className="flex items-center gap-3 text-cyan-400">
-              <Wifi size={18} />
-              <span className="text-[10px] font-bold uppercase tracking-[3px]">Link Address</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 text-cyan-400">
+                <Wifi size={18} />
+                <span className="text-[10px] font-bold uppercase tracking-[3px]">Link Address</span>
+              </div>
+              <span className="text-[8px] text-white/20 font-mono">ESP32-CAM PORT: 443</span>
             </div>
             
             <input 
@@ -54,6 +69,14 @@ export default function ConnectPanel({ onConnected }: { onConnected: () => void 
               placeholder="0.0.0.0"
               className="w-full bg-transparent border-none px-0 py-2 text-white font-mono text-2xl focus:outline-none placeholder:text-white/10"
             />
+          </div>
+
+          <div className="px-2">
+            <h3 className="text-cyan-400/60 text-[8px] font-bold uppercase tracking-widest mb-2">Network Configuration</h3>
+            <p className="text-[9px] text-white/30 leading-relaxed mb-3">
+              This cloud interface requires a public or tunneled IP. 
+              Use <span className="text-cyan-400/80">ngrok</span> for local development.
+            </p>
           </div>
 
           <motion.button 

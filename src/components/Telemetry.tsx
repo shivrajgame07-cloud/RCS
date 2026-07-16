@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { useMemo } from 'react';
 
 export default function Telemetry() {
-  const sensors = useRobotStore((s) => s.state.sensors);
+  const { sensors, lastUpdate } = useRobotStore((s) => s.state);
 
   // Mock historical data for the chart
   const chartData = useMemo(() => {
@@ -15,10 +15,23 @@ export default function Telemetry() {
       temp: 24 + Math.random() * 0.2,
       v: 12 + Math.random() * 0.5,
     }));
-  }, [sensors.lastUpdate]); // Regenerate periodically for demo effect
+  }, [lastUpdate]); // Regenerate periodically for demo effect
+
+  const phoneLinked = useMemo(() => {
+    // If we've received telemetry that looks like it came from a phone recently
+    return sensors.battery > 0 && sensors.humidity > 0;
+  }, [sensors.battery, sensors.humidity]);
 
   return (
     <div className="w-full h-full flex flex-col space-y-4">
+      <div className="flex items-center justify-between px-1">
+        <span className="text-[10px] font-bold text-white/20 uppercase tracking-[3px]">System Health</span>
+        <div className={`flex items-center gap-2 px-2 py-0.5 rounded-full border ${phoneLinked ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-white/5 border-white/10 text-white/30'}`}>
+          <div className={`w-1.5 h-1.5 rounded-full ${phoneLinked ? 'bg-green-400 animate-pulse' : 'bg-white/20'}`} />
+          <span className="text-[8px] font-bold uppercase tracking-tighter">{phoneLinked ? 'Mobile Uplink Active' : 'Waiting for Phone...'}</span>
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-2">
         <SensorCard 
           icon={<Battery size={16} />} 
@@ -36,7 +49,15 @@ export default function Telemetry() {
           borderClass="border-l-cyan-500 shadow-[inset_10px_0_15px_-10px_rgba(0,242,255,0.2)]"
         />
         <SensorCard icon={<Gauge size={16} />} label="Velocity" value={`${sensors.speed.toFixed(2)} m/s`} color="text-white" />
-        <SensorCard icon={<MapPin size={16} />} label="Obstacles" value="04" color="text-white" />
+        <SensorCard icon={<Zap size={16} />} label="Accel" value={`${sensors.acceleration.toFixed(2)} m/s²`} color="text-yellow-400" />
+        <SensorCard 
+          icon={<MapPin size={16} />} 
+          label="Obstacle" 
+          value={`${sensors.proximity || 0} cm`} 
+          color={sensors.proximity < 20 ? "text-red-500 animate-pulse" : "text-white"} 
+          borderClass={sensors.proximity < 20 ? "border-l-red-500 shadow-[inset_10px_0_15px_-10px_rgba(239,68,68,0.3)]" : ""}
+        />
+        <SensorCard icon={<Wifi size={16} />} label="Servo" value={`${sensors.servoAngle}°`} color="text-purple-400" />
       </div>
 
       <div className="flex-1 glass-card p-4 flex flex-col overflow-hidden">

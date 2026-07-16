@@ -16,26 +16,37 @@ export default function App() {
 
   useEffect(() => {
     socket.on('telemetry', (data) => {
-      setTelemetry(data);
+      if (data) setTelemetry(data);
     });
 
-    socket.on('status_change', ({ status, connected }) => {
-      setTelemetry({ status, connected });
-      addLog(`SYSTEM: ${status.toUpperCase()}`);
+    socket.on('status_change', (data) => {
+      if (data && data.status) {
+        setTelemetry({ status: data.status, connected: data.connected ?? false });
+        addLog(`SYSTEM: ${String(data.status).toUpperCase()}`);
+      }
     });
 
-    socket.on('command_ack', ({ text }) => {
-      addLog(`ROBOT: ${text}`);
+    socket.on('command_ack', (data) => {
+      if (data && data.text) {
+        addLog(`ROBOT: ${data.text}`);
+      }
+    });
+
+    socket.on('camera_url_update', (url) => {
+      if (url) {
+        useRobotStore.getState().setCamUrl(url);
+        addLog(`SYSTEM: CAMERA FEED SYNCED`);
+      }
     });
 
     return () => {
       socket.off('telemetry');
       socket.off('status_change');
       socket.off('command_ack');
+      socket.off('camera_url_update');
     };
   }, []);
 
-  // Keyboard Controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
@@ -91,7 +102,7 @@ export default function App() {
                   <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center shadow-[0_0_15px_rgba(0,242,255,0.5)]">
                     <Cpu size={18} className="text-black" />
                   </div>
-                  <span className="font-bold text-xl tracking-tight neon-text-blue">ROBOTICS OS</span>
+                  <span className="font-bold text-xl tracking-tight neon-text-blue">Robotics Control System</span>
                 </div>
                 
                 <div className="h-6 w-[1px] bg-white/10" />
